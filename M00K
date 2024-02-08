@@ -1,0 +1,9 @@
+Unable to negotiate with 10.133.35.143 port 22: no matching host key type found. Their offer: ssh-rsa
+
+-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.
+https://support.genymotion.com/hc/en-us/articles/9500420360093-I-get-the-error-no-matching-host-key-type-found-Their-offer-ssh-rsa-when-trying-to-connect-with-SSH
+
+You can also add the following in your ssh config file, /etc/ssh/ssh_config :
+-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.
+HostKeyAlgorithms = +ssh-rsa
+PubkeyAcceptedAlgorithms = +ssh-rsa
