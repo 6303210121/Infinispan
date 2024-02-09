@@ -1,0 +1,49 @@
+package debug
+ 
+import (
+	"fmt"
+	"golang.org/x/crypto/ssh"
+	"testing"
+	"log"
+)
+ 
+func TestConnectToRouter(t *testing.T){
+	// SSH server details
+	serverAddress := "10.133.35.158"
+	serverUsername := "admin"
+	serverPassword := "tcs123"
+	sshCommand := "show ip interface brief"
+ 
+	// Create SSH client configuration
+	config := &ssh.ClientConfig{
+		User: serverUsername,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(serverPassword),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+ 
+	// Connect to the SSH server
+	client, err := ssh.Dial("tcp", serverAddress+":22", config)
+	if err != nil {
+		log.Fatalf("Failed to connect to the server: %v", err)
+	}
+	defer client.Close()
+ 
+	// Create a new SSH session
+	session, err := client.NewSession()
+	if err != nil {
+		log.Fatalf("Failed to create session: %v", err)
+	}
+	defer session.Close()
+ 
+	// Run the SSH command
+	output, err := session.CombinedOutput(sshCommand)
+	if err != nil {
+		log.Fatalf("Failed to execute command: %v", err)
+	}
+ 
+	// Print the command output
+	fmt.Printf("Command Output:\n%s\n", output)
+}
+
