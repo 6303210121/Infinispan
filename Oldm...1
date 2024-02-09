@@ -1,0 +1,68 @@
+
+func TestShowVersionCommand(t *testing.T) {
+	serverAddress := "10.133.35.158"
+	serverUsername := "admin"
+	serverPassword := "tcs123"
+	sshCommand := "show version"
+
+	config := &ssh.ClientConfig{
+		User: serverUsername,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(serverPassword),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	client, err := ssh.Dial("tcp", serverAddress+":22", config)
+	if err != nil {
+		log.Fatalf("Failed to connect to the server: %v", err)
+	}
+	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		log.Fatalf("Failed to create session: %v", err)
+	}
+	defer session.Close()
+
+	output, err := session.CombinedOutput(sshCommand)
+	if err != nil {
+		log.Fatalf("Failed to execute command: %v", err)
+	}
+
+	fmt.Printf("Command Output:\n%s\n", output)
+}
+
+func TestShowInterfacesDetailCommand(t *testing.T) {
+	serverAddress := "10.133.35.158"
+	serverUsername := "admin"
+	serverPassword := "tcs123"
+	sshCommand := "show interfaces detail"
+
+	config := &ssh.ClientConfig{
+		User: serverUsername,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(serverPassword),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	client, err := ssh.Dial("tcp", serverAddress+":22", config)
+	if err != nil {
+		log.Fatalf("Failed to connect to the server: %v", err)
+	}
+	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		log.Fatalf("Failed to create session: %v", err)
+	}
+	defer session.Close()
+
+	output, err := session.CombinedOutput(sshCommand)
+	if err != nil {
+		log.Fatalf("Failed to execute command: %v", err)
+	}
+
+	fmt.Printf("Command Output:\n%s\n", output)
+}
