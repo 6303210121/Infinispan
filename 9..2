@@ -1,0 +1,44 @@
+
+func TestInvalidCredentials(t *testing.T) {
+	// Test case for connecting with invalid credentials
+	serverAddress := "10.133.35.158"
+	serverUsername := "invalidUser"
+	serverPassword := "invalidPassword"
+	sshCommand := "show ip interface brief"
+
+	config := &ssh.ClientConfig{
+		User: serverUsername,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(serverPassword),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	_, err := ssh.Dial("tcp", serverAddress+":22", config)
+	if err == nil {
+		t.Error("Expected error for invalid credentials, but got nil")
+	}
+}
+
+func TestInvalidServerAddress(t *testing.T) {
+	// Test case for connecting with an invalid server address
+	serverAddress := "invalidAddress"
+	serverUsername := "admin"
+	serverPassword := "tcs123"
+	sshCommand := "show ip interface brief"
+
+	config := &ssh.ClientConfig{
+		User: serverUsername,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(serverPassword),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	_, err := ssh.Dial("tcp", serverAddress+":22", config)
+	if err == nil {
+		t.Error("Expected error for invalid server address, but got nil")
+	}
+}
+
+// Add more test cases as needed based on different scenarios you want to cover.
