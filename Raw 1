@@ -1,0 +1,58 @@
+package debug
+
+import (
+    "fmt"
+    "golang.org/x/crypto/ssh"
+    "testing"
+    "log"
+)
+
+func TestInterconnection(t *testing.T) {
+    // Define the IP addresses, usernames, and passwords for the routers
+    router1Address := "10.133.35.158"
+    router1Username := "admin"
+    router1Password := "tcs123"
+    router2Address := "10.133.35.143"
+    router2Username := "admin"
+    router2Password := "tcs123"
+
+    // SSH commands to verify connectivity
+    pingCommand := "ping " + router2Address
+    tracerouteCommand := "traceroute " + router2Address
+
+    // Connect to Router 1
+    router1Config := &ssh.ClientConfig{
+        User: router1Username,
+        Auth: []ssh.AuthMethod{
+            ssh.Password(router1Password),
+        },
+        HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+    }
+    router1Client, err := ssh.Dial("tcp", router1Address+":22", router1Config)
+    if err != nil {
+        log.Fatalf("Failed to connect to Router 1: %v", err)
+    }
+    defer router1Client.Close()
+
+    // Execute commands on Router 1
+    router1Session, err := router1Client.NewSession()
+    if err != nil {
+        log.Fatalf("Failed to create session on Router 1: %v", err)
+    }
+    defer router1Session.Close()
+
+    router1PingOutput, err := router1Session.CombinedOutput(pingCommand)
+    if err != nil {
+        t.Errorf("Failed to execute ping command on Router 1: %v", err)
+    }
+    fmt.Printf("Router 1 Ping Output:\n%s\n", router1PingOutput)
+
+    router1TracerouteOutput, err := router1Session.CombinedOutput(tracerouteCommand)
+    if err != nil {
+        t.Errorf("Failed to execute traceroute command on Router 1: %v", err)
+    }
+    fmt.Printf("Router 1 Traceroute Output:\n%s\n", router1TracerouteOutput)
+
+    // Connect to Router 2 (similar to Router 1)
+    // Execute commands on Router 2 to verify connectivity with Router 1
+}
