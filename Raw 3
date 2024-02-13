@@ -61,3 +61,78 @@ func main() {
 
 	fmt.Printf("%+v\n", testbed)
 }
+
+
+
+
+............................
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"gopkg.in/yaml.v2"
+)
+
+// Connection represents the connection details for a device
+type Connection struct {
+	Cli struct {
+		IP       string `yaml:"ip"`
+		Port     int    `yaml:"port"`
+		Protocol string `yaml:"protocol"`
+	} `yaml:"cli"`
+	Credentials struct {
+		Default struct {
+			Password string `yaml:"password"`
+			Username string `yaml:"username"`
+		} `yaml:"default"`
+		Enable struct {
+			Password string `yaml:"password"`
+		} `yaml:"enable"`
+	} `yaml:"credentials"`
+	Os   string `yaml:"os"`
+	Type string `yaml:"type"`
+}
+
+// Device represents a network device in the testbed
+type Device struct {
+	Alias       string     `yaml:"alias"`
+	Connections Connection `yaml:"connections"`
+	Os          string     `yaml:"os"`
+	Type        string     `yaml:"type"`
+}
+
+// Interface represents a network interface in the testbed
+type Interface struct {
+	Link string `yaml:"link"`
+	Type string `yaml:"type"`
+}
+
+// Topology represents the network topology in the testbed
+type Topology struct {
+	Interfaces map[string]Interface `yaml:"interfaces"`
+}
+
+// Testbed represents the overall testbed configuration
+type Testbed struct {
+	Devices  map[string]Device `yaml:"devices"`
+	Topology map[string]Topology `yaml:"topology"`
+}
+
+func main() {
+	// Read the YAML file
+	yamlFile, err := ioutil.ReadFile("your_testbed_file.yaml")
+	if err != nil {
+		panic(err)
+	}
+
+	// Unmarshal YAML into Testbed struct
+	var testbed Testbed
+	err = yaml.Unmarshal(yamlFile, &testbed)
+	if err != nil {
+		panic(err)
+	}
+
+	// Print the parsed testbed data
+	fmt.Printf("Testbed:\n%+v\n", testbed)
+}
