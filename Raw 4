@@ -1,0 +1,141 @@
+package debug
+
+import (
+	"fmt"
+	"golang.org/x/crypto/ssh"
+	"testing"
+	"log"
+	"io/ioutil"
+	"gopkg.in/yaml.v2"
+	"strings"
+)
+
+type Testbed struct {
+	Devices   map[string]Device   `yaml:"devices"`
+	Topology  map[string]Topology `yaml:"topology"`
+}
+
+type Device struct {
+	Alias       string            `yaml:"alias"`
+	Connections map[string]Conn  `yaml:"connections"`
+	Credentials map[string]Creds `yaml:"credentials"`
+	Os          string            `yaml:"os"`
+	Type        string            `yaml:"type"`
+}
+
+type Conn struct {
+	IP       string `yaml:"ip"`
+	Port     int    `yaml:"port"`
+	Protocol string `yaml:"protocol"`
+}
+
+type Creds struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
+
+type Topology struct {
+	Interfaces map[string]Interface `yaml:"interfaces"`
+}
+
+type Interface struct {
+	Link string `yaml:"link"`
+	Type string `yaml:"type"`
+}
+
+func TestInterconnection(t *testing.T) {
+	// Load testbed file
+	testbedFile, err := ioutil.ReadFile("testbed.yaml")
+	if err != nil {
+		log.Fatalf("Failed to read testbed file: %v", err)
+	}
+
+	// Unmarshal testbed file
+	var testbed Testbed
+	err = yaml.Unmarshal(testbedFile, &testbed)
+	if err != nil {
+		log.Fatalf("Failed to unmarshal testbed file: %v", err)
+	}
+
+	// Get router details from testbed
+	router1 := testbed.Devices["n9k1"]
+	router2 := testbed.Devices["n9k4"]
+
+	// Connect to Router 1
+	router1Client, err := connect(router1.Connections["cli"].IP, router1.Credentials["default"].Username, router1.Credentials["default"].Password)
+	if err != nil {
+		t.Fatalf("Failed to connect to Router 1: %v", err)
+	}
+	defer router1Client.Close()
+
+	// Connect to Router 2
+	router2Client, err := connect(router2.Connections["cli"].IP, router2.Credentials["default"].Username, router2.Credentials["default"].Password)
+	if err != nil {
+		t.Fatalf("Failed to connect to Router 2: %v", err)
+	}
+	defer router2Client.Close()
+
+	// Execute commands to check interface status on Router 1
+	router1InterfaceStatus, err := executeCommand(router1Client, "show interface brief")
+	if err != nil {
+		t.Errorf("Failed to execute command on Router 1: %v", err)
+	}
+	fmt.Printf("Router 1 Interface Status:\n%s\n", router1InterfaceStatus)
+
+	// Execute commands to check interface status on Router 2
+	router2InterfaceStatus, err := executeCommand(router2Client, "show interface brief")
+	if err != nil {
+		t.Errorf("Failed to execute command on Router 2: %v", err)
+	}
+	fmt.Printf("Router 2 Interface Status:\n%s\n", router2InterfaceStatus)
+
+	// Check Ethernet interface status on both routers
+	if !strings.Contains(router1InterfaceStatus, "Eth1/1 up") || !strings.Contains(router2InterfaceStatus, "Eth1/1 up") {
+		t.Errorf("Ethernet interface Eth1/1 is not up on both routers")
+	}
+
+	// Execute ping commands to test connectivity between routers
+	_, err = executeCommand(router1Client, "ping "+router2.Connections["cli"].IP)
+	if err != nil {
+		t.Errorf("Failed to ping Router 2 from Router 1: %v", err)
+	}
+
+	_, err = executeCommand(router2Client, "ping "+router1.Connections["cli"].IP)
+	if err != nil {
+		t.Errorf("Failed to ping Router 1 from Router 2: %v", err)
+	}
+}
+
+// Helper function to establish SSH connection
+func connect(ip, username, password string) (*ssh.Client, error) {
+	config := &ssh.ClientConfig{
+		User: username,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(password),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	client, err := ssh.Dial("tcp", ip+":22", config)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
+// Helper function to execute commands on routers
+func executeCommand(client *ssh.Client, command string) (string, error) {
+	session, err := client.NewSession()
+	if err != nil {
+		return "", err
+	}
+	defer session.Close()
+
+	output, err := session.CombinedOutput(command)
+	if err != nil {
+		return "", err
+	}
+
+	return string(output), nil
+}
