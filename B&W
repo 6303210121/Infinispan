@@ -1,0 +1,141 @@
+package main
+
+import (
+    "fmt"
+    "log"
+    "golang.org/x/crypto/ssh"
+    "testing"
+)
+
+func executeCommand(client *ssh.Client, command string) (string, error) {
+    session, err := client.NewSession()
+    if err != nil {
+        return "", fmt.Errorf("failed to create session: %v", err)
+    }
+    defer session.Close()
+
+    output, err := session.CombinedOutput(command)
+    if err != nil {
+        return "", fmt.Errorf("failed to execute command '%s': %v", command, err)
+    }
+
+    return string(output), nil
+}
+
+func main() {
+    // Router 1 SSH Configuration
+    router1Address := "10.133.35.158"
+    router1Username := "admin"
+    router1Password := "tcs123"
+    router1Config := &ssh.ClientConfig{
+        User: router1Username,
+        Auth: []ssh.AuthMethod{
+            ssh.Password(router1Password),
+        },
+        HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+    }
+
+    // Router 2 SSH Configuration
+    router2Address := "10.133.35.143"
+    router2Username := "admin"
+    router2Password := "tcs123"
+    router2Config := &ssh.ClientConfig{
+        User: router2Username,
+        Auth: []ssh.AuthMethod{
+            ssh.Password(router2Password),
+        },
+        HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+    }
+
+    // Connect to Router 1
+    router1Client, err := ssh.Dial("tcp", router1Address+":22", router1Config)
+    if err != nil {
+        log.Fatalf("Failed to connect to router 1: %v", err)
+    }
+    defer router1Client.Close()
+
+    // Connect to Router 2
+    router2Client, err := ssh.Dial("tcp", router2Address+":22", router2Config)
+    if err != nil {
+        log.Fatalf("Failed to connect to router 2: %v", err)
+    }
+    defer router2Client.Close()
+
+    command := "configure terminal\n" +
+               "interface Ethernet1/0\n" +
+               "ip address 192.168.1.1 255.255.255.0\n" +
+               "no shutdown\n" +
+               "exit\n" +
+               "router ospf 1\n" +
+               "network 192.168.1.0 0.0.0.255 area 0\n" +
+               "exit\n" +
+               "exit\n"
+
+    // Exe Router 1 cmds
+    output1, err := executeCommand(router1Client, command)
+    if err != nil {
+        log.Fatalf("Failed to configure router 1: %v", err)
+    }
+    fmt.Printf("Router 1 output:\n%s\n", output1)
+
+    // Exe Router 2 cmds
+    output2, err := executeCommand(router2Client, command)
+    if err != nil {
+        log.Fatalf("Failed to configure router 2: %v", err)
+    }
+    fmt.Printf("Router 2 output:\n%s\n", output2)
+}
+
+func TestInterconnection(t *testing.T) {
+
+    router1Address := "10.133.35.158"
+    router1Username := "admin"
+    router1Password := "tcs123"
+//    router2Address := "10.133.35.143"
+    r2 := "12.12.12.2"
+//    router2Username := "admin"
+//    router2Password := "tcs123"
+
+
+    pingCommand := "ping " + r2
+    tracerouteCommand := "traceroute " + r2
+//r1 c
+    router1Config := &ssh.ClientConfig{
+        User: router1Username,
+        Auth: []ssh.AuthMethod{
+            ssh.Password(router1Password),
+        },
+        HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+    }
+    router1Client, err := ssh.Dial("tcp", router1Address+":22", router1Config)
+    if err != nil {
+        log.Fatalf("Failed to connect to Router 1: %v", err)
+    }
+    defer router1Client.Close()
+
+//command exec
+    router1Session, err := router1Client.NewSession()
+    if err != nil {
+        log.Fatalf("Failed to create session on Router 1: %v", err)
+    }
+    defer router1Session.Close()
+
+    router1PingOutput, err := router1Session.CombinedOutput(pingCommand)
+    if err != nil {
+        t.Errorf("Failed to execute ping command on Router 1: %v", err)
+    }
+    fmt.Printf("Router 1 Ping Output:\n%s\n", router1PingOutput)
+
+    router1TracerouteSession, err := router1Client.NewSession()
+    if err != nil {
+        log.Fatalf("Failed to create session for traceroute on Router 1: %v", err)
+    }
+    defer router1TracerouteSession.Close()
+
+    router1TracerouteOutput, err := router1TracerouteSession.CombinedOutput(tracerouteCommand)
+    if err != nil {
+        t.Errorf("Failed to execute traceroute command on Router 1: %v", err)
+    }
+    fmt.Printf("Router 1 Traceroute Output:\n%s\n", router1TracerouteOutput)
+
+}
