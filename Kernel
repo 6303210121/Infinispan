@@ -2,7 +2,8 @@ https://www.atlantic.net/dedicated-server-hosting/how-to-install-latest-linux-ke
 uname -r  -->>>4.19.57
 To verify virtualbox service status : sudo systemctl status vboxdrv
 if its not working try,  sudo systemctl start vboxdrv
-Check Kernel Module Loading: Confirm if the vboxdrv module is loaded:lsmod | grep vboxdrvIf it's not loaded, attempt to load it manually:sudo modprobe vboxdrv
+Check Kernel Module Loading: Confirm if the vboxdrv module is loaded :  lsmod | grep vboxdrv
+If it's not loaded, attempt to load it manually :  sudo modprobe vboxdrv
 ____________________________________________
 
 error:    sudo /sbin/vboxconfig
