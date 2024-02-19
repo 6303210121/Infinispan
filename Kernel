@@ -16,11 +16,13 @@ locate vboxdrv.sh
 1   sudo apt-get remove --purge virtualbox
 2   sudo apt-get install virtualbox
 --->>>>>>  sudo apt --fix-broken install   (fix broken packages error)
+       
 now try this, sudo apt-get remove --purge virtualbox
               sudo apt-get install virtualbox
 
 Got this error :  Failed to start LSB: VirtualBox Linux kernel module.
 
+  -->>>>>  sudo modprobe vboxdrv
 ________________________________________________________________________________________________________________________________________
 https://copyprogramming.com/howto/failed-to-start-lsb-virtualbox-linux-kernel-module#failed-to-start-lsb-virtualbox-linux-kernel-module
 nameserver 127.0.0.53
