@@ -25,3 +25,4 @@ ________________________________________________________________________________
 https://copyprogramming.com/howto/failed-to-start-lsb-virtualbox-linux-kernel-module#failed-to-start-lsb-virtualbox-linux-kernel-module
 nameserver 127.0.0.53
 search India.TCS.com
+error in linux headers : sudo apt-get install linux-headers-generic
