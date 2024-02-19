@@ -1,6 +1,7 @@
 https://www.atlantic.net/dedicated-server-hosting/how-to-install-latest-linux-kernel-on-ubuntu/
-
-uname-4.19.57
+uname -r  -->>>4.19.57
+To verify virtualbox service status : sudo systemctl status vboxdrv
+if its not working try,  sudo systemctl start vboxdrv
 ____________________________________________
 
 error:    sudo /sbin/vboxconfig
@@ -15,3 +16,5 @@ locate vboxdrv.sh
 --->>>>>>  sudo apt --fix-broken install   (fix broken packages error)
 now try this, sudo apt-get remove --purge virtualbox
               sudo apt-get install virtualbox
+
+Got this error :  Failed to start LSB: VirtualBox Linux kernel module.
