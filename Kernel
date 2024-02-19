@@ -1,7 +1,17 @@
 https://www.atlantic.net/dedicated-server-hosting/how-to-install-latest-linux-kernel-on-ubuntu/
 
 uname-4.19.57
-
---->>>>>>  sudo apt --fix-broken install   (fix broken packages error)
 ____________________________________________
 
+error:    sudo /sbin/vboxconfig
+          sudo: /sbin/vboxconfig: command not found
+then, sudo /usr/lib/virtualbox/vboxdrv.sh setup
+      sudo: /usr/lib/virtualbox/vboxdrv.sh: command not found
+sudo updatedb
+locate vboxdrv.sh
+
+1   sudo apt-get remove --purge virtualbox
+2   sudo apt-get install virtualbox
+--->>>>>>  sudo apt --fix-broken install   (fix broken packages error)
+now try this, sudo apt-get remove --purge virtualbox
+              sudo apt-get install virtualbox
