@@ -20,3 +20,6 @@ now try this, sudo apt-get remove --purge virtualbox
               sudo apt-get install virtualbox
 
 Got this error :  Failed to start LSB: VirtualBox Linux kernel module.
+
+________________________________________________________________________________________________________________________________________
+https://copyprogramming.com/howto/failed-to-start-lsb-virtualbox-linux-kernel-module#failed-to-start-lsb-virtualbox-linux-kernel-module
